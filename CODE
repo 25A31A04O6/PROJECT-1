@@ -1,0 +1,511 @@
+#include <stdio.h> 
+
+#include <string.h> 
+
+#include <stdlib.h> 
+
+  
+
+// --- Constants --- 
+
+#define MAX_FACULTY 10 
+
+#define MAX_COURSES 10 
+
+#define NAME_LENGTH 50 
+
+#define CODE_LENGTH 10 
+
+  
+
+// --- Data Structures --- 
+
+  
+
+// Structure for a Course 
+
+struct Course { 
+
+    char course_code[CODE_LENGTH]; 
+
+    char course_name[NAME_LENGTH]; 
+
+    int faculty_id; // -1 means unallotted 
+
+}; 
+
+  
+
+// Structure for a Faculty 
+
+struct Faculty { 
+
+    int id; 
+
+    char name[NAME_LENGTH]; 
+
+    int max_courses; // Max courses this faculty can be allotted 
+
+    int current_load; // Current number of courses allotted 
+
+}; 
+
+  
+
+// --- Global Arrays and Counters --- 
+
+struct Faculty faculties[MAX_FACULTY]; 
+
+struct Course courses[MAX_COURSES]; 
+
+int faculty_count = 0; 
+
+int course_count = 0; 
+
+  
+
+// --- Function Prototypes --- 
+
+void display_menu(); 
+
+void add_faculty(); 
+
+void add_course(); 
+
+void allot_course(); 
+
+void view_allotments(); 
+
+  
+
+// --- Main Function --- 
+
+int main() { 
+
+    int choice; 
+
+     
+
+    // Initialize faculty_id in courses to unallotted 
+
+    for (int i = 0; i < MAX_COURSES; i++) { 
+
+        courses[i].faculty_id = -1; 
+
+    } 
+
+  
+
+    printf("Welcome to the Faculty Course Allotment System (C Console)\n"); 
+
+     
+
+    // Main loop for the system 
+
+    do { 
+
+        display_menu(); 
+
+        printf("Enter your choice: "); 
+
+        if (scanf("%d", &choice) != 1) { 
+
+            // Handle non-integer input 
+
+            while (getchar() != '\n'); 
+
+            choice = -1;  
+
+        } 
+
+  
+
+        switch (choice) { 
+
+            case 1: 
+
+                add_faculty(); 
+
+                break; 
+
+            case 2: 
+
+                add_course(); 
+
+                break; 
+
+            case 3: 
+
+                allot_course(); 
+
+                break; 
+
+            case 4: 
+
+                view_allotments(); 
+
+                break; 
+
+            case 0: 
+
+                printf("\nExiting System. Goodbye!\n"); 
+
+                break; 
+
+            default: 
+
+                printf("\nInvalid choice. Please try again.\n"); 
+
+        } 
+
+    } while (choice != 0); 
+
+  
+
+    return 0; 
+
+} 
+
+  
+
+// --- Function Definitions --- 
+
+  
+
+// Displays the main menu options 
+
+void display_menu() { 
+
+    printf("\n--- MENU ---\n"); 
+
+    printf("1. Add New Faculty\n"); 
+
+    printf("2. Add New Course\n"); 
+
+    printf("3. Allot Course to Faculty\n"); 
+
+    printf("4. View All Allotments\n"); 
+
+    printf("0. Exit\n"); 
+
+    printf("----------------\n"); 
+
+} 
+
+  
+
+// Function to add a new faculty member 
+
+void add_faculty() { 
+
+    if (faculty_count >= MAX_FACULTY) { 
+
+        printf("\nError: Maximum faculty limit reached.\n"); 
+
+        return; 
+
+    } 
+
+  
+
+    printf("\n--- Add New Faculty ---\n"); 
+
+    faculties[faculty_count].id = 100 + faculty_count; // Auto-generate ID 
+
+    printf("Generated Faculty ID: %d\n", faculties[faculty_count].id); 
+
+  
+
+    printf("Enter Faculty Name: "); 
+
+    scanf(" %[^\n]", faculties[faculty_count].name); 
+
+  
+
+    printf("Enter Maximum Courses (load) for this Faculty: "); 
+
+    if (scanf("%d", &faculties[faculty_count].max_courses) != 1 || faculties[faculty_count].max_courses < 0) { 
+
+        printf("Invalid input. Setting max load to 3.\n"); 
+
+        faculties[faculty_count].max_courses = 3; 
+
+    } 
+
+  
+
+    faculties[faculty_count].current_load = 0; 
+
+    faculty_count++; 
+
+    printf("\nFaculty added successfully!\n"); 
+
+} 
+
+  
+
+// Function to add a new course 
+
+void add_course() { 
+
+    if (course_count >= MAX_COURSES) { 
+
+        printf("\nError: Maximum course limit reached.\n"); 
+
+        return; 
+
+    } 
+
+  
+
+    printf("\n--- Add New Course ---\n"); 
+
+    printf("Enter Course Code (e.g., CS101): "); 
+
+    scanf(" %s", courses[course_count].course_code); 
+
+  
+
+    printf("Enter Course Name: "); 
+
+    scanf(" %[^\n]", courses[course_count].course_name); 
+
+  
+
+    courses[course_count].faculty_id = -1; // Initially unallotted 
+
+    course_count++; 
+
+    printf("\nCourse added successfully and is currently UNALLOTTED.\n"); 
+
+} 
+
+  
+
+// Function to allot a course to a faculty member 
+
+void allot_course() { 
+
+    int fac_id, course_index = -1, fac_index = -1; 
+
+    char code[CODE_LENGTH]; 
+
+  
+
+    if (faculty_count == 0 || course_count == 0) { 
+
+        printf("\nError: Need faculty and courses to allot. Please add them first.\n"); 
+
+        return; 
+
+    } 
+
+  
+
+    printf("\n--- Course Allotment ---\n"); 
+
+    printf("Enter Course Code to allot: "); 
+
+    scanf(" %s", code); 
+
+  
+
+    // Find the course 
+
+    for (int i = 0; i < course_count; i++) { 
+
+        if (strcmp(courses[i].course_code, code) == 0) { 
+
+            course_index = i; 
+
+            break; 
+
+        } 
+
+    } 
+
+  
+
+    if (course_index == -1) { 
+
+        printf("Error: Course code not found.\n"); 
+
+        return; 
+
+    } 
+
+  
+
+    if (courses[course_index].faculty_id != -1) { 
+
+        printf("Error: This course is already allotted to Faculty ID %d.\n", courses[course_index].faculty_id); 
+
+        return; 
+
+    } 
+
+  
+
+    printf("Enter Faculty ID for allotment: "); 
+
+    if (scanf("%d", &fac_id) != 1) { 
+
+        printf("Invalid Faculty ID input.\n"); 
+
+        return; 
+
+    } 
+
+     
+
+    // Find the faculty 
+
+    for (int i = 0; i < faculty_count; i++) { 
+
+        if (faculties[i].id == fac_id) { 
+
+            fac_index = i; 
+
+            break; 
+
+        } 
+
+    } 
+
+  
+
+    if (fac_index == -1) { 
+
+        printf("Error: Faculty ID not found.\n"); 
+
+        return; 
+
+    } 
+
+     
+
+    // Check faculty load constraint 
+
+    if (faculties[fac_index].current_load >= faculties[fac_index].max_courses) { 
+
+        printf("\nAllotment Failed! Faculty %s (ID: %d) has reached their maximum load of %d courses.\n",  
+
+               faculties[fac_index].name, fac_id, faculties[fac_index].max_courses); 
+
+        return; 
+
+    } 
+
+  
+
+    // Perform the allotment 
+
+    courses[course_index].faculty_id = fac_id; 
+
+    faculties[fac_index].current_load++; 
+
+  
+
+    printf("\nSuccess! Course %s (%s) allotted to Faculty %s (ID: %d).\n",  
+
+           courses[course_index].course_name, courses[course_index].course_code,  
+
+           faculties[fac_index].name, fac_id); 
+
+} 
+
+  
+
+// Function to view all courses and their current allotment status 
+
+void view_allotments() { 
+
+    printf("\n--- ALL COURSE ALLOTMENTS ---\n"); 
+
+  
+
+    if (course_count == 0) { 
+
+        printf("No courses have been added yet.\n"); 
+
+        return; 
+
+    } 
+
+     
+
+    printf("| %-10s | %-30s | %-12s | %-30s |\n",  
+
+           "Course Code", "Course Name", "Faculty ID", "Faculty Name"); 
+
+    printf("---------------------------------------------------------------------------------\n"); 
+
+  
+
+    for (int i = 0; i < course_count; i++) { 
+
+        int faculty_id = courses[i].faculty_id; 
+
+        char faculty_name[NAME_LENGTH] = "UNALLOTTED"; 
+
+         
+
+        // Find the faculty name 
+
+        if (faculty_id != -1) { 
+
+            for (int j = 0; j < faculty_count; j++) { 
+
+                if (faculties[j].id == faculty_id) { 
+
+                    strcpy(faculty_name, faculties[j].name); 
+
+                    break; 
+
+                } 
+
+            } 
+
+        } 
+
+         
+
+        printf("| %-10s | %-30s | %-12d | %-30s |\n",  
+
+               courses[i].course_code,  
+
+               courses[i].course_name,  
+
+               faculty_id,  
+
+               faculty_name); 
+
+    } 
+
+    printf("---------------------------------------------------------------------------------\n"); 
+
+    printf("\n--- FACULTY LOAD SUMMARY ---\n"); 
+
+    printf("| %-12s | %-30s | %-15s | %-10s |\n",  
+
+           "Faculty ID", "Faculty Name", "Current Load", "Max Load"); 
+
+    printf("------------------------------------------------------------------\n"); 
+
+    for (int i = 0; i < faculty_count; i++) { 
+
+        printf("| %-12d | %-30s | %-15d | %-10d |\n",  
+
+               faculties[i].id,  
+
+               faculties[i].name,  
+
+               faculties[i].current_load,  
+
+               faculties[i].max_courses); 
+
+    } 
+
+    printf("------------------------------------------------------------------\n"); 
+
+} 
